@@ -1,0 +1,117 @@
+@import "tailwindcss";
+@import "@fontsource-variable/rubik";
+@import "@fontsource-variable/jetbrains-mono";
+
+@theme {
+  --color-background: #111113;
+  --color-surface: #1c1b22;
+  --color-surface-hover: #232229;
+  --color-foreground: #f0eff4;
+  --color-muted: #9e9da8;
+  --color-accent: #f76f53;
+  --color-accent-hover: #e85d42;
+  --color-border: rgba(255, 255, 255, 0.08);
+  --color-border-strong: rgba(255, 255, 255, 0.14);
+
+  --font-family-sans: "Rubik", sans-serif;
+  --font-family-mono: "JetBrains Mono", monospace;
+
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1.5rem;
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -4px rgba(0, 0, 0, 0.4);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    overflow-x: hidden;
+    scrollbar-gutter: stable both-edges;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans text-base overflow-x-hidden antialiased;
+    line-height: 1.7;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply text-foreground font-semibold leading-tight;
+    letter-spacing: -0.01em;
+    margin: 0 0 1rem;
+  }
+
+  h1 {
+    font-size: 2rem;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+  }
+
+  h3 {
+    font-size: 1.25rem;
+  }
+
+  p {
+    @apply text-muted;
+    margin: 0 0 1rem;
+  }
+
+  a {
+    @apply text-accent no-underline;
+    transition:
+      color 0.2s ease-in-out,
+      opacity 0.2s ease-in-out;
+  }
+
+  a:hover {
+    @apply text-accent-hover;
+    opacity: 0.9;
+  }
+
+  code {
+    @apply font-mono text-sm bg-surface border border-border rounded-sm;
+    padding: 0.15rem 0.4rem;
+  }
+
+  pre {
+    @apply font-mono text-sm bg-surface border border-border rounded-md overflow-x-auto shadow-sm;
+    padding: 1.25rem;
+  }
+
+  pre code {
+    @apply bg-transparent border-none p-0;
+  }
+
+  strong {
+    @apply text-foreground font-medium;
+  }
+
+  article h2 {
+    @apply border-l-2 border-accent pl-3;
+  }
+
+  article ul {
+    @apply list-disc list-outside mb-6 ml-6;
+  }
+
+  article ol {
+    @apply list-decimal list-outside mb-6 ml-6;
+  }
+
+  article li {
+    @apply text-muted mb-2;
+  }
+
+  article li::marker {
+    @apply text-foreground;
+  }
+}

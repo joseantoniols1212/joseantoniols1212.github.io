@@ -1,0 +1,25 @@
+---
+const today = new Date();
+---
+
+<footer class="px-4 sm:px-6 py-8 bg-background border-t border-border">
+  <div
+    class="max-w-[760px] px-8 sm:px-6 mx-auto flex flex-col sm:flex-row items-center sm:items-center justify-between gap-3 sm:gap-4 text-center sm:text-left"
+  >
+    <span class="text-sm text-muted"
+      >&copy; {today.getFullYear()} Jose Antonio. All rights reserved.</span
+    >
+    <div class="flex gap-5">
+      <a
+        href="/blog"
+        class="text-sm text-muted no-underline opacity-100 transition-colors duration-200 hover:text-foreground hover:opacity-100"
+        >Blog</a
+      >
+      <a
+        href="/about"
+        class="text-sm text-muted no-underline opacity-100 transition-colors duration-200 hover:text-foreground hover:opacity-100"
+        >About</a
+      >
+    </div>
+  </div>
+</footer>

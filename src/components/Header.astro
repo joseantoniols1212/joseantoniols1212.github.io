@@ -1,0 +1,74 @@
+---
+import { SITE_TITLE } from "../consts";
+import HeaderLink from "./HeaderLink.astro";
+---
+
+<header
+  class="sticky top-0 z-[100] px-4 sm:px-6 border-b border-border backdrop-blur-[12px]"
+  style="background: rgba(17,17,19,0.85);"
+>
+  <nav
+    class="max-w-[760px] px-8 sm:px-6 mx-auto h-[56px] sm:h-[60px] flex items-center justify-between"
+  >
+    <a
+      href="/"
+      class="text-foreground underline decoration-accent font-semibold tracking-tight transition-colors duration-200 no-underline hover:text-accent hover:opacity-100"
+    >
+      {SITE_TITLE}
+    </a>
+    <div id="nav-links" class="relative flex items-center gap-1">
+      <!-- Sliding underline -->
+      <span
+        id="nav-pill"
+        class="absolute bottom-0 h-[2px] bg-accent pointer-events-none"
+        style="transition: transform 0.2s ease, width 0.2s ease, opacity 0.2s ease; opacity: 0;"
+      ></span>
+      <HeaderLink href="/">Home</HeaderLink>
+      <HeaderLink href="/blog">Blog</HeaderLink>
+      <HeaderLink href="/about">About</HeaderLink>
+    </div>
+  </nav>
+</header>
+
+<script>
+  function initNavPill() {
+    const nav = document.getElementById("nav-links");
+    const pill = document.getElementById("nav-pill");
+    if (!nav || !pill) return;
+
+    const links = nav.querySelectorAll<HTMLAnchorElement>("a");
+    const activeLink = nav.querySelector<HTMLAnchorElement>("[data-active='true']");
+
+    function movePill(el: HTMLElement, instant = false) {
+      const navRect = nav!.getBoundingClientRect();
+      const rect = el.getBoundingClientRect();
+      const x = rect.left - navRect.left;
+
+      if (instant) pill!.style.transition = "none";
+      pill!.style.transform = `translateX(${x}px)`;
+      pill!.style.width = `${rect.width}px`;
+      pill!.style.opacity = "1";
+      if (instant) {
+        pill!.getBoundingClientRect(); // force reflow
+        pill!.style.transition = "transform 0.2s ease, width 0.2s ease, opacity 0.2s ease";
+      }
+    }
+
+    // Place pill on active link immediately, no animation
+    if (activeLink) movePill(activeLink, true);
+
+    links.forEach((link) => {
+      link.addEventListener("mouseenter", () => movePill(link));
+      link.addEventListener("mouseleave", () => {
+        if (activeLink) {
+          movePill(activeLink);
+        } else {
+          pill!.style.opacity = "0";
+        }
+      });
+    });
+  }
+
+  initNavPill();
+  document.addEventListener("astro:page-load", initNavPill);
+</script>

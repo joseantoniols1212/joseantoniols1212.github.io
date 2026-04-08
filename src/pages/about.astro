@@ -1,0 +1,177 @@
+---
+import { getCollection, render } from "astro:content";
+import Layout from "../layouts/BlogPost.astro";
+
+const jobs = (await getCollection("experience")).sort((a, b) => a.data.order - b.data.order);
+
+const studies = (await getCollection("studies")).sort((a, b) => a.data.order - b.data.order);
+
+function formatPeriod(start: Date, end?: Date) {
+  const fmt = (d: Date) => d.toLocaleDateString("en-US", { month: "short", year: "numeric" });
+  return end ? `${fmt(start)} – ${fmt(end)}` : `${fmt(start)} – Present`;
+}
+---
+
+<Layout title="About" description="Background, education, and experience." pubDate={new Date()}>
+  <section class="mb-10">
+    <h2
+      class="text-sm uppercase tracking-[0.08em] font-medium mb-4 border-l-2 border-accent pl-3"
+      style="font-size:1.1rem;"
+    >
+      Who I am
+    </h2>
+    <ul class="list-none p-0">
+      <li class="py-2 border-b border-border text-muted last:border-none">
+        <strong>Name:</strong> José Antonio Luque Salguero
+      </li>
+      <li class="py-2 border-b border-border text-muted last:border-none">
+        <strong>Role:</strong> Software Engineer
+      </li>
+      <li class="py-2 border-b border-border text-muted last:border-none">
+        <strong>Based in:</strong> Málaga, Spain
+      </li>
+    </ul>
+  </section>
+
+  <section class="mb-10">
+    <h2
+      class="text-sm uppercase tracking-[0.08em] font-medium mb-4 border-l-2 border-accent pl-3"
+      style="font-size:1.1rem;"
+    >
+      What I do
+    </h2>
+    <p class="text-muted leading-[1.7]">
+      Software engineer with a strong foundation in computer science and mathematics. I work across
+      the full stack, from backend services to frontend applications in several different languages.
+      I am passionate about artificial intelligence, machine learning, and mathematics, and I am
+      always looking for new challenges and opportunities to learn and grow.
+    </p>
+  </section>
+
+  <section class="mb-10">
+    <h2
+      class="text-sm uppercase tracking-[0.08em] font-medium mb-4 border-l-2 border-accent pl-3"
+      style="font-size:1.1rem;"
+    >
+      Stack
+    </h2>
+    <ul class="list-none p-0">
+      <li class="py-2 border-b border-border text-muted last:border-none">
+        <strong>Languages:</strong> Python, C, Java, JavaScript, TypeScript
+      </li>
+      <li class="py-2 border-b border-border text-muted last:border-none">
+        <strong>Backend:</strong> Spring Boot, REST APIs, Kafka, Oracle, PostgreSQL, MongoDB
+      </li>
+      <li class="py-2 border-b border-border text-muted last:border-none">
+        <strong>Frontend:</strong> Angular, HTML, CSS, Tailwind
+      </li>
+      <li class="py-2 border-b border-border text-muted last:border-none">
+        <strong>DevOps:</strong> Docker, Kubernetes, GitHub Actions, AWS, GCP
+      </li>
+      <li class="py-2 border-b border-border text-muted last:border-none">
+        <strong>ML / Scientific:</strong> PyTorch, Jupyter, Matlab, LaTeX
+      </li>
+    </ul>
+  </section>
+
+  <section class="mb-10">
+    <h2
+      class="text-sm uppercase tracking-[0.08em] font-medium mb-4 border-l-2 border-accent pl-3"
+      style="font-size:1.1rem;"
+    >
+      Experience
+    </h2>
+    <ol class="list-none p-0 relative border-l border-border ml-2">
+      {
+        jobs.map(async (job) => {
+          const { Content } = await render(job);
+          const isPresent = !job.data.endDate;
+          return (
+            <li class="ml-6 mb-8 last:mb-0">
+              {/* dot on the line */}
+              <span
+                class:list={[
+                  "absolute -left-[5px] mt-1.5 h-[10px] w-[10px] rounded-full border-2 border-background",
+                  isPresent ? "bg-accent" : "bg-border-strong",
+                ]}
+                style="border-color: var(--color-background);"
+              />
+              <p class="font-mono text-xs text-muted mb-1 m-0">
+                {formatPeriod(job.data.startDate, job.data.endDate)}
+                {job.data.location && <span class="ml-2 opacity-60">· {job.data.location}</span>}
+              </p>
+              <h3
+                class="text-base font-semibold text-foreground mb-0.5"
+                style="margin:0 0 0.125rem;"
+              >
+                {job.data.role}
+              </h3>
+              <p class="text-sm text-accent mb-2 m-0" style="margin:0 0 0.5rem;">
+                {job.data.url ? (
+                  <a
+                    href={job.data.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="text-accent hover:underline"
+                  >
+                    {job.data.company}
+                  </a>
+                ) : (
+                  job.data.company
+                )}
+              </p>
+              <div class="text-sm text-muted leading-[1.7] [&>p]:m-0">
+                <Content />
+              </div>
+            </li>
+          );
+        })
+      }
+    </ol>
+  </section>
+
+  <section class="mb-10">
+    <h2
+      class="text-sm uppercase tracking-[0.08em] font-medium mb-4 border-l-2 border-accent pl-3"
+      style="font-size:1.1rem;"
+    >
+      Studies
+    </h2>
+    <ol class="list-none p-0 relative border-l border-border ml-2">
+      {
+        studies.map(async (study) => {
+          const { Content } = await render(study);
+          return (
+            <li class="ml-6 mb-8 last:mb-0">
+              <span
+                class="absolute -left-[5px] mt-1.5 h-[10px] w-[10px] rounded-full border-2 bg-accent"
+                style="border-color: var(--color-background);"
+              />
+              <p class="font-mono text-xs text-muted mb-1 m-0">
+                {formatPeriod(study.data.startDate, study.data.endDate)}
+                {study.data.location && (
+                  <span class="ml-2 opacity-60">· {study.data.location}</span>
+                )}
+              </p>
+              <h3
+                class="text-base font-semibold text-foreground mb-0.5"
+                style="margin:0 0 0.125rem;"
+              >
+                {study.data.degree}
+                {study.data.field && (
+                  <span class="font-normal text-muted"> · {study.data.field}</span>
+                )}
+              </h3>
+              <p class="text-sm text-accent mb-2 m-0" style="margin:0 0 0.5rem;">
+                {study.data.institution}
+              </p>
+              <div class="text-sm text-muted leading-[1.7] [&>p]:m-0">
+                <Content />
+              </div>
+            </li>
+          );
+        })
+      }
+    </ol>
+  </section>
+</Layout>

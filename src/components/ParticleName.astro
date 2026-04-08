@@ -1,0 +1,173 @@
+---
+interface Props {
+  name: string;
+}
+const { name } = Astro.props;
+---
+
+<div class="relative">
+  <div id="particle-placeholder"></div>
+  <svg id="particle-svg" aria-label={name} role="img" class="absolute pointer-events-none"></svg>
+</div>
+
+<script define:vars={{ name }}>
+  const MAX_FONT_SIZE = 72;
+  const DOT_SPACING = 5;
+  const DOT_RADIUS = 2.2;
+  const REPEL_RADIUS = 100;
+  const REPEL_STRENGTH = 7;
+  const SPRING = 0.065;
+  const DAMPING = 0.78;
+  const COLOR_HOME = "#f76f53";
+  const COLOR_AWAY = "#f0eff4";
+  const BASE_PAD = 200;
+
+  const svg = document.getElementById("particle-svg");
+  const placeholder = document.getElementById("particle-placeholder");
+
+  let particles = [];
+  let mouse = { x: -9999, y: -9999 };
+  let rafId = null;
+  let isTouching = false;
+
+  async function init() {
+    await document.fonts.load(`600 ${MAX_FONT_SIZE}px Rubik`);
+
+    // Compute available width and scale font to fit
+    const containerW = (svg.parentElement?.offsetWidth || window.innerWidth) - 4;
+    const off = document.createElement("canvas");
+    const octx = off.getContext("2d");
+
+    // Measure at max size, then scale down if needed
+    octx.font = `600 ${MAX_FONT_SIZE}px Rubik, sans-serif`;
+    const maxW = Math.ceil(octx.measureText(name).width) + 24;
+    const scale = maxW > containerW ? containerW / maxW : 1;
+    const fontSize = Math.max(Math.floor(MAX_FONT_SIZE * scale), 24);
+    const pad = Math.round(BASE_PAD * scale);
+
+    const font = `600 ${fontSize}px Rubik, sans-serif`;
+    octx.font = font;
+    const textW = Math.ceil(octx.measureText(name).width) + 24;
+    const textH = Math.ceil(fontSize * 1.4);
+
+    off.width = textW;
+    off.height = textH;
+    octx.font = font;
+    octx.fillStyle = "#fff";
+    octx.fillText(name, 4, fontSize);
+
+    const { data } = octx.getImageData(0, 0, textW, textH);
+
+    // Clear existing circles
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    particles = [];
+    isTouching = false;
+
+    for (let y = 0; y < textH; y += DOT_SPACING) {
+      for (let x = 0; x < textW; x += DOT_SPACING) {
+        const i = (y * textW + x) * 4;
+        if (data[i + 3] > 128) {
+          const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+          circle.setAttribute("r", DOT_RADIUS);
+          circle.setAttribute("fill", COLOR_HOME);
+          svg.appendChild(circle);
+          particles.push({
+            x: x + pad,
+            y: y + pad,
+            homeX: x + pad,
+            homeY: y + pad,
+            vx: 0,
+            vy: 0,
+            el: circle,
+          });
+        }
+      }
+    }
+
+    placeholder.style.width = textW + "px";
+    placeholder.style.height = fontSize + "px";
+
+    const svgW = textW + pad * 2;
+    const svgH = textH + pad * 2;
+    svg.setAttribute("width", svgW);
+    svg.setAttribute("height", svgH);
+    svg.style.width = svgW + "px";
+    svg.style.height = svgH + "px";
+    svg.style.top = -pad + "px";
+    svg.style.left = -pad + "px";
+
+    cancelAnimationFrame(rafId);
+    animate();
+  }
+
+  function animate() {
+    for (const p of particles) {
+      p.vx += (p.homeX - p.x) * SPRING;
+      p.vy += (p.homeY - p.y) * SPRING;
+
+      const dx = p.x - mouse.x;
+      const dy = p.y - mouse.y;
+      const distSq = dx * dx + dy * dy;
+      if (distSq < REPEL_RADIUS * REPEL_RADIUS && distSq > 0) {
+        const dist = Math.sqrt(distSq);
+        const force = ((REPEL_RADIUS - dist) / REPEL_RADIUS) * REPEL_STRENGTH;
+        p.vx += (dx / dist) * force;
+        p.vy += (dy / dist) * force;
+      }
+
+      p.vx *= DAMPING;
+      p.vy *= DAMPING;
+      p.x += p.vx;
+      p.y += p.vy;
+
+      const displaced = Math.min(Math.hypot(p.x - p.homeX, p.y - p.homeY) / 30, 1);
+      p.el.setAttribute("cx", p.x);
+      p.el.setAttribute("cy", p.y);
+      p.el.setAttribute("fill", displaced > 0.05 ? COLOR_AWAY : COLOR_HOME);
+    }
+
+    rafId = requestAnimationFrame(animate);
+  }
+
+  // Mouse — desktop
+  document.addEventListener("mousemove", (e) => {
+    const rect = svg.getBoundingClientRect();
+    mouse.x = e.clientX - rect.left;
+    mouse.y = e.clientY - rect.top;
+  });
+
+  // Touch — mobile
+  function setTouchPos(e) {
+    const touch = e.touches[0];
+    const rect = svg.getBoundingClientRect();
+    mouse.x = touch.clientX - rect.left;
+    mouse.y = touch.clientY - rect.top;
+    isTouching = true;
+  }
+
+  document.addEventListener("touchstart", setTouchPos, { passive: true });
+  document.addEventListener("touchmove", setTouchPos, { passive: true });
+
+  document.addEventListener("touchend", () => {
+    isTouching = false;
+    mouse.x = -9999;
+    mouse.y = -9999;
+  });
+
+  // Reinit on resize (debounced)
+  let resizeTimer;
+  window.addEventListener("resize", () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      cancelAnimationFrame(rafId);
+      init();
+    }, 150);
+  });
+
+  document.addEventListener("astro:page-load", () => {
+    cancelAnimationFrame(rafId);
+    init();
+  });
+
+  init();
+</script>

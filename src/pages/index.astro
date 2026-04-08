@@ -1,0 +1,135 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import ParticleName from "../components/ParticleName.astro";
+import TerminalVisualizer from "../components/TerminalVisualizer.astro";
+import DownloadIcon from "../components/icons/DownloadIcon.astro";
+import { SITE_DESCRIPTION, SITE_TITLE } from "../consts";
+import { skillTree } from "../data/skills";
+
+const jobs = await getCollection("experience");
+const studies = await getCollection("studies");
+const posts = (await getCollection("blog")).filter((post) => !post.data.draft);
+
+// Deduplicate companies and institutions
+const uniqueCompanies = [...new Set(jobs.map((j) => j.data.company))];
+const uniqueInstitutions = [...new Set(studies.map((s) => s.data.institution))];
+
+const nodes = [
+  // Center
+  { id: "Jose Antonio", group: 1, size: 14 },
+
+  // Main sections
+  { id: "Skills", group: 2, size: 10 },
+  { id: "Blog", group: 2, size: 9, href: "/blog" },
+  { id: "About", group: 2, size: 9, href: "/about" },
+
+  // Skill sub-sections
+  ...Object.keys(skillTree).map((cat) => ({ id: cat, group: 3, size: 7 })),
+
+  // Skill leaves
+  ...Object.values(skillTree)
+    .flat()
+    .map((item) => ({ id: item, group: 4, size: 5 })),
+
+  // About sub-sections
+  { id: "Experience", group: 3, size: 7 },
+  { id: "Studies", group: 3, size: 7 },
+
+  // Experience leaves (unique companies)
+  ...uniqueCompanies.map((company) => ({ id: company, group: 4, size: 5 })),
+
+  // Studies leaves (unique institutions)
+  ...uniqueInstitutions.map((inst) => ({ id: inst, group: 4, size: 5 })),
+
+  // Blog post leaves
+  ...posts.map((p) => ({
+    id: p.id,
+    label: p.data.title,
+    group: 4,
+    size: 5,
+    href: `/blog/${p.id}/`,
+  })),
+];
+
+const links = [
+  // Center → main sections
+  { source: "Jose Antonio", target: "Skills" },
+  { source: "Jose Antonio", target: "Blog" },
+  { source: "Jose Antonio", target: "About" },
+
+  // Skills → sub-sections
+  ...Object.keys(skillTree).map((cat) => ({ source: "Skills", target: cat })),
+
+  // Skill sub-sections → leaves
+  ...Object.entries(skillTree).flatMap(([cat, items]) =>
+    items.map((item) => ({ source: cat, target: item }))
+  ),
+
+  // About → sub-sections
+  { source: "About", target: "Experience" },
+  { source: "About", target: "Studies" },
+
+  // Experience → unique companies
+  ...uniqueCompanies.map((company) => ({ source: "Experience", target: company })),
+
+  // Studies → unique institutions
+  ...uniqueInstitutions.map((inst) => ({ source: "Studies", target: inst })),
+
+  // Blog → posts
+  ...posts.map((p) => ({ source: "Blog", target: p.id })),
+];
+---
+
+<BaseLayout title={SITE_TITLE} description={SITE_DESCRIPTION}>
+  <section class="pt-8 sm:pt-12 pb-6 sm:pb-8">
+    <p class="text-base mb-1">Hi, I'm</p>
+    <ParticleName name="Jose Antonio" />
+    <p class="text-lg text-muted max-w-[520px] leading-[1.7] mt-2 mb-8">
+      Software engineer with a background in computer science and mathematics. I build fullstack
+      applications, backend services, and dive into AI and deep learning with interest in robotics,
+      math and physics.
+    </p>
+    <div class="flex gap-3 flex-wrap">
+      <a
+        href="/about"
+        class="inline-block bg-accent text-white no-underline opacity-100 px-5 py-2.5 rounded-sm text-sm font-medium transition-colors duration-200 hover:bg-accent-hover hover:opacity-100"
+        >About me</a
+      >
+      <a
+        href="/blog"
+        class="inline-block bg-surface text-foreground border border-border-strong no-underline opacity-100 px-5 py-2.5 rounded-sm text-sm font-medium transition-colors duration-200 hover:bg-surface-hover hover:opacity-100"
+        >Read blog</a
+      >
+      <a
+        href="/cv.pdf"
+        download="Jose_Antonio_Luque_CV.pdf"
+        class="inline-flex items-center gap-2 bg-surface text-foreground border border-border-strong no-underline opacity-100 px-5 py-2.5 rounded-sm text-sm font-medium transition-colors duration-200 hover:bg-surface-hover hover:opacity-100"
+      >
+        <DownloadIcon size={14} />
+        Download CV
+      </a>
+    </div>
+  </section>
+
+  <section class="my-10">
+    <h2 class="text-2xl font-semibold mb-1 border-l-2 border-accent pl-3">Content graph</h2>
+    <p class="text-muted mb-4">
+      A visual map of my skills and how they connect. Drag nodes, scroll to zoom, or pan around to
+      explore.
+    </p>
+    <TerminalVisualizer nodes={nodes} links={links} />
+  </section>
+
+  <section class="my-10">
+    <h2 class="text-2xl font-semibold mb-4 border-l-2 border-accent pl-3">Explore</h2>
+    <ul class="list-none p-0">
+      <li class="py-3 border-b border-border text-muted last:border-none">
+        <a href="/blog" class="text-accent">Blog</a> — Thoughts on engineering, math, and software.
+      </li>
+      <li class="py-3 border-b border-border text-muted last:border-none">
+        <a href="/about" class="text-accent">About</a> — Background, education, and experience.
+      </li>
+    </ul>
+  </section>
+</BaseLayout>

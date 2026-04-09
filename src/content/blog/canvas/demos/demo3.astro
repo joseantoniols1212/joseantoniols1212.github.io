@@ -1,0 +1,48 @@
+---
+
+---
+
+<canvas
+  id="demo3"
+  width="600"
+  height="300"
+  class="border border-gray-400 w-full aspect-auto mx-auto"></canvas>
+
+<script>
+  const canvas = document.getElementById("demo3") as HTMLCanvasElement;
+  const ctx = canvas.getContext("2d")!;
+
+  const ball = {
+    x: 100,
+    y: 100,
+    vx: 5,
+    vy: 1,
+    radius: 50,
+    color: "blue",
+    draw() {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+      ctx.fillStyle = this.color;
+      ctx.fill();
+    },
+  };
+
+  const draw = () => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    if (ball.x + ball.radius > canvas.width || ball.x - ball.radius < 0) {
+      ball.vx = -ball.vx;
+    }
+    if (ball.y + ball.radius > canvas.height || ball.y - ball.radius < 0) {
+      ball.vy = -ball.vy;
+    }
+
+    ball.x += ball.vx;
+    ball.y += ball.vy;
+
+    ball.draw();
+    requestAnimationFrame(draw);
+  };
+
+  requestAnimationFrame(draw);
+</script>

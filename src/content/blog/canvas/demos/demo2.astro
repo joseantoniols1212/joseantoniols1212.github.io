@@ -1,0 +1,23 @@
+---
+
+---
+
+<canvas
+  id="demo2"
+  width="600"
+  height="300"
+  class="border border-gray-400 w-full aspect-auto mx-auto"></canvas>
+
+<script>
+  const canvas = document.getElementById("demo2") as HTMLCanvasElement;
+  const ctx = canvas.getContext("2d")!;
+
+  ctx.beginPath();
+  ctx.moveTo(100, 10);
+  ctx.lineTo(150, 60);
+  ctx.lineTo(100, 110);
+  ctx.lineTo(50, 60);
+  ctx.closePath();
+  ctx.fillStyle = "red";
+  ctx.fill();
+</script>

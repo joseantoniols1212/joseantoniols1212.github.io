@@ -3,7 +3,7 @@ title: "On digital gardening, or why I'm writing here"
 description: "I'm starting a blog that isn't really a blog, just some notes on things I work on and find interesting."
 pubDate: "Mar 30 2026"
 heroImage: "./cover.png"
-draft: false
+draft: true
 ---
 
 I'm not a natural writer or a person that left notes on its own thoughts. But I'm trying to change that. I want to start documenting some projets that never make it out of my mind (hopefully this will help), what I learn along the way and even some article for myself about complex topics I find interesting so I can get a better understanding of them. And as a side bonus, improve my writing skills in English (it is not my first language).
